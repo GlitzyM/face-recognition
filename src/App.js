@@ -10,8 +10,8 @@ import Register from "./Components/Register/Register";
 import "./App.css";
 
 const setUpClarifyApi = (imageUrl) => {
-  const PAT = "83237c9522e9453caa21698ce2bd1101";
-  const USER_ID = "glitzy";
+  const PAT = process.env.REACT_APP_PAT;
+  const USER_ID = process.env.REACT_APP_USER_ID;
   const APP_ID = "face-recognition";
   //const MODEL_ID = 'face-detection';
   const IMAGE_URL = imageUrl;
@@ -43,23 +43,25 @@ const setUpClarifyApi = (imageUrl) => {
   return requestOptions;
 };
 
+const initialState = {
+  input: "",
+  imageUrl: "",
+  boundingBox: {},
+  route: "signin",
+  isSignedIn: false,
+  user: {
+    id: "",
+    name: "",
+    email: "",
+    entries: 0,
+    joined: "",
+  },
+};
+
 class App extends Component {
   constructor() {
     super();
-    this.state = {
-      input: "",
-      imageUrl: "",
-      boundingBox: {},
-      route: "signin",
-      isSignedIn: false,
-      user: {
-        id: "",
-        name: "",
-        email: "",
-        entries: 0,
-        joined: "",
-      },
-    };
+    this.state = initialState;
   }
 
   loadUser = (data) => {
@@ -118,7 +120,8 @@ class App extends Component {
             .then((res) => res.json())
             .then((count) => {
               this.setState(Object.assign(this.state.user, { entries: count }));
-            });
+            })
+            .catch((err) => console.log("unable to fetch url"));
         }
         this.displayFaceBox(this.calculateFaceLocation(result)); //console.log(result.outputs[0].data.regions[0].region_info.bounding_box)
       })
@@ -127,7 +130,7 @@ class App extends Component {
 
   onRouteChange = (route) => {
     if (route === "signout" || route === "signin") {
-      this.setState({ isSignedIn: false });
+      this.setState(initialState);
     } else if (route === "home") {
       this.setState({ isSignedIn: true });
     }
